@@ -15,34 +15,9 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.item.Item;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.util.Hand;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.shade.plugin.SettingPlugin;
 
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
-import org.apache.commons.io.IOUtils;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import java.net.URI;
 import java.net.URL;
@@ -52,11 +27,6 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import java.awt.*;
-import java.util.Arrays;
-
-import java.util.Comparator;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class CommandGuiPlugin extends Screen{
     protected static final MinecraftClient MC = MinecraftClient.getInstance();
