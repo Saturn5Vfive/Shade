@@ -29,8 +29,11 @@ public class TickEventHandler{
     }
 
     public static void callUpdate(){
+        player = MinecraftClient.getInstance().player;
         for (int i = 0; i < thooks.size(); i++) {
-            ChatPlugin.sendIngame(thooks.get(i));
+            if(player != null){
+                ChatPlugin.sendIngame(thooks.get(i));
+            }
         }
     }
 }
