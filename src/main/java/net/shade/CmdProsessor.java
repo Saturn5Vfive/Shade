@@ -642,6 +642,7 @@ public class CmdProsessor{
 
             case "if":
             parseFew();
+            doFunctions();
             switch(args[1].toLowerCase()){
 
                 case "sneaking":
@@ -714,6 +715,8 @@ public class CmdProsessor{
             break;
 
             case "fif":
+            parseFew();
+            doFunctions();
             switch(args[1].toLowerCase()){
 
                 case "sneaking":
@@ -1067,6 +1070,9 @@ public class CmdProsessor{
                 String n = "null";
                 if(MC.player.getMainHandStack().hasTag()){
                     n = MC.player.getMainHandStack().getTag().getString(g[1]);
+                    if(n == null || n == ""){
+                        n = "null";
+                    }
                 }else{
                     args[i] = "null";
                 }
