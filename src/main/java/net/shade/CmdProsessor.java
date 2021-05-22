@@ -32,6 +32,7 @@ import net.minecraft.item.Item;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.text.Text;
+import net.minecraft.client.util.Clipboard;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.LiteralText;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
@@ -40,6 +41,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.util.Hand;
 import net.shade.plugin.DiscordWebhook;
 import net.shade.plugin.RequirePlugin;
+import java.util.Objects;
 
 
 
@@ -242,8 +244,7 @@ public class CmdProsessor{
             ChatPlugin.sendChat(SettingPlugin.prefix + "give <item> <amount> <nbt>");
             ChatPlugin.sendChat(SettingPlugin.prefix + "hang <millis>");
             ChatPlugin.sendChat(SettingPlugin.prefix + "hook <identifier> <command>");
-            ChatPlugin.sendChat(SettingPlugin.prefix + "tick <command>");
-            ChatPlugin.sendChat(SettingPlugin.prefix + "clearticks");
+            ChatPlugin.sendChat(SettingPlugin.prefix + "mixin <ontick/onleftclick/onrightclick/clear> <command>");
             ChatPlugin.sendChat(SettingPlugin.prefix + "if <jumping/sprinting/sneaking/is/nbt/click/midclick/onground/rclick/dropitem/custom> <args1/nbt> <args2> <command> (args1 and 2 only apply for is and nbt)");
             ChatPlugin.sendChat(SettingPlugin.prefix + "fif (same arguments as if)");
             ChatPlugin.sendChat(SettingPlugin.prefix + "velocity <add/set/eset/eadd> <x> <y> <z>");
@@ -255,6 +256,7 @@ public class CmdProsessor{
             ChatPlugin.sendChat(SettingPlugin.prefix + "tps <number>");
             ChatPlugin.sendChat(SettingPlugin.prefix + "import <url>");
             ChatPlugin.sendChat(SettingPlugin.prefix + "quit");
+            ChatPlugin.sendChat(SettingPlugin.prefix + "copy <text>");
             break;
 
             case "gamemode":
@@ -629,17 +631,6 @@ public class CmdProsessor{
             ChatPlugin.sendChat("Cleared all Hooks!");
             break;
 
-            case "tick":
-            if(args[1] != null){
-                TickEventHandler.subscribe(getPast(1).trim());
-            }
-            break;
-
-            case "clearticks":
-            TickEventHandler.unsubscribeAll();
-            ChatPlugin.sendChat("Cleared all tick events");
-            break;
-
             case "if":
             parseFew();
             doFunctions();
@@ -903,6 +894,47 @@ public class CmdProsessor{
 
             case "quit":
                 MC.world.disconnect();
+            break;
+            
+            case "noserver":
+                SettingPlugin.doServerControl = false;
+                ChatPlugin.sendChat("Disabled Server Chat Control!");
+            break;
+            
+            case "server":
+                SettingPlugin.doServerControl = true;
+                ChatPlugin.sendChat("Enabled Server Chat Control!");
+            break;
+
+            case "mixin":
+                if(args.length < 2){
+                    return;
+                }
+                switch(args[1].toLowerCase()){
+                    case "ontick":
+                        MixinProsessHandler.addOnTick(getPast(2).trim());
+                    break;
+
+                    case "onleftclick":
+                        MixinProsessHandler.addOnLeftClick(getPast(2).trim());
+                    break;
+
+                    case "onrightclick":
+                        MixinProsessHandler.addOnRightClick(getPast(2).trim());
+                    break;
+
+                    case "clear":
+                        MixinProsessHandler.destroyall();
+                        ChatPlugin.sendChat("Cleared all events");
+                    break;
+                }
+            break;
+
+            case "copy":
+                if(args.length < 2){
+                    return;
+                }
+                new Clipboard().setClipboard(MinecraftClient.getInstance().getWindow().getHandle(), getPast(1).trim());
             break;
         }
     }

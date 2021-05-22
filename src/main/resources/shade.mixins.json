@@ -8,7 +8,8 @@
   "client": [
     "ChatOutputMixin",
     "MinecraftClientMixin",
-    "RenderTickCounterMixin"
+    "RenderTickCounterMixin",
+    "ChatInputMixin"
   ],
   "injectors": {
     "defaultRequire": 1
