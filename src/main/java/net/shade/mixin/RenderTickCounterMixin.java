@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.client.render.RenderTickCounter;
 import net.shade.CmdProsessor;
 
-//bleachhack moment
+
 @Mixin(RenderTickCounter.class)
 public class RenderTickCounterMixin {
 

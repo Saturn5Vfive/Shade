@@ -930,6 +930,10 @@ public class CmdProsessor{
                 }
             break;
 
+            case "tick":
+            MixinProsessHandler.addOnTick(getPast(1).trim());
+            break;
+
             case "copy":
                 if(args.length < 2){
                     return;
