@@ -4,6 +4,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import net.shade.plugin.ChatPlugin;
 import net.shade.CmdProsessor;
 import net.shade.plugin.SettingPlugin;
+import net.shade.CmdProsessor;
+import java.util.*;
+import java.nio.file.*;
+import java.io.*;
 import net.shade.MixinProsessHandler;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,11 +20,21 @@ import net.shade.plugin.CommandGuiPlugin;
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
 
+    private static boolean isFirstGameTick = true;
+
     @Inject(method = "tick", at = @At("HEAD"))
     public void hookTickEvent(CallbackInfo callbackInfo) {
         MixinProsessHandler.callUpdate();
         if(Shade.cGuiKey.isPressed()){
             MinecraftClient.getInstance().openScreen(new CommandGuiPlugin());
+        }
+        if(isFirstGameTick){
+            try{
+                Path autorun = CmdProsessor.shadeFolder.resolve("AutoRun.txt");
+                String j = CmdProsessor.readFromInputStream(autorun);
+                MinecraftClient.getInstance().player.sendChatMessage(j);
+                isFirstGameTick = false;
+            }catch(Exception e){}
         }
     }
 

@@ -5,6 +5,9 @@ import java.util.Random;
 import net.shade.plugin.ChatPlugin;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import java.util.*;
+import java.nio.file.*;
+import java.io.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.shade.plugin.SettingPlugin;
@@ -62,6 +65,7 @@ public class CmdProsessor{
     static boolean doProsessDump = false;
     public static Double gameFrameRate = 1.0;
     private static String text = "";
+    public static Path shadeFolder = initfolder();
 
     public void prosess(String command){ 
         args = command.split(" ");
@@ -915,6 +919,7 @@ public class CmdProsessor{
                         MixinProsessHandler.addOnTick(getPast(2).trim());
                     break;
 
+
                     case "onleftclick":
                         MixinProsessHandler.addOnLeftClick(getPast(2).trim());
                     break;
@@ -939,6 +944,12 @@ public class CmdProsessor{
                     return;
                 }
                 new Clipboard().setClipboard(MinecraftClient.getInstance().getWindow().getHandle(), getPast(1).trim());
+            break;
+
+            case "load":
+                Path myfile = shadeFolder.resolve(args[1]);
+                String j = readFromInputStream(myfile);
+                MC.player.sendChatMessage(j);
             break;
         }
     }
@@ -1181,4 +1192,30 @@ public class CmdProsessor{
 		
 		return MC.player;
 	}
+
+    private static Path initfolder(){
+        Path mcfolder = MC.runDirectory.toPath().normalize();
+        Path shadeFolder = mcfolder.resolve("shade");
+        try{
+            Files.createDirectories(shadeFolder);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return shadeFolder;
+    }
+
+    public static String readFromInputStream(Path p){
+        try{
+            StringBuilder resultStringBuilder = new StringBuilder();
+            try (BufferedReader br = Files.newBufferedReader(p)) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    resultStringBuilder.append(line);
+                }
+            }
+            return resultStringBuilder.toString();
+        }catch(Exception e){
+            return "";
+        }
+    }
 }
