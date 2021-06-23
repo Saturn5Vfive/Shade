@@ -1,50 +1,51 @@
 package net.shade;
 
-import java.util.Random;
-
-import net.shade.plugin.ChatPlugin;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
-import java.util.*;
-import java.nio.file.*;
-import java.io.*;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-import net.shade.plugin.SettingPlugin;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameMode;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.util.math.Direction;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.item.Item;
+import java.io.BufferedReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.text.Text;
+import java.util.Random;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.Clipboard;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
+import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.LiteralText;
-import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.GameMode;
+import net.shade.plugin.ChatPlugin;
 import net.shade.plugin.DiscordWebhook;
 import net.shade.plugin.RequirePlugin;
-import java.util.Objects;
+import net.shade.plugin.SettingPlugin;
 
 
 
@@ -148,7 +149,7 @@ public class CmdProsessor{
             doFunctions();
             try{
                 Integer clipamount = Integer.valueOf(args[1]);
-                Vec3d forward = Vec3d.fromPolar(0, player.yaw).normalize();  
+                Vec3d forward = Vec3d.fromPolar(0, player.getYaw()).normalize();  
                 player.updatePosition(pos.getX() + forward.x * clipamount, pos.getY(), pos.getZ() + forward.z * clipamount); 
                 ChatPlugin.sendChat("Clipped Player " + args[1] + " blocks");
             }catch(Exception e){
@@ -159,7 +160,7 @@ public class CmdProsessor{
             case "dump":
             try{
                 ItemStack stack = player.getMainHandStack();
-                CompoundTag ct = stack.getTag();
+                NbtCompound ct = stack.getTag();
                 String print = ct == null ? "" : ct.asString();
                 ChatPlugin.sendChat("Nbt: " + print);         
                 if(doProsessDump) nset = print;           
@@ -173,7 +174,7 @@ public class CmdProsessor{
             doFunctions();
             try{
                 Double force = Double.parseDouble(args[1]);
-                Vec3d forward = Vec3d.fromPolar(player.pitch, player.yaw).normalize();
+                Vec3d forward = Vec3d.fromPolar(player.getPitch(), player.getYaw()).normalize();
                 Vec3d velocity = player.getVelocity();
                 MinecraftClient.getInstance().player.setVelocity(velocity.x + forward.x * force, velocity.y + forward.y * force, velocity.z + forward.z * force);
             }catch(Exception e){
@@ -216,7 +217,7 @@ public class CmdProsessor{
             case "mod":
             doVariables();
             doFunctions();
-            ItemStack stack = player.inventory.getMainHandStack();
+            ItemStack stack = player.getInventory().getMainHandStack();
             if(stack == null){
                 ChatPlugin.sendChat("Hold An Item In your hand");
                 break;
@@ -261,6 +262,7 @@ public class CmdProsessor{
             ChatPlugin.sendChat(SettingPlugin.prefix + "import <url>");
             ChatPlugin.sendChat(SettingPlugin.prefix + "quit");
             ChatPlugin.sendChat(SettingPlugin.prefix + "copy <text>");
+            ChatPlugin.sendChat(SettingPlugin.prefix + "load <file>");
             break;
 
             case "gamemode":
@@ -272,13 +274,11 @@ public class CmdProsessor{
             }
             switch (args[1].toLowerCase()){
                 case "creative":
-                MinecraftClient.getInstance().player.setGameMode(GameMode.CREATIVE);
                 MinecraftClient.getInstance().interactionManager.setGameMode(GameMode.CREATIVE);
                 ChatPlugin.sendChat("Set Gamemode to creative");
                 break;
 
                 case "survival":
-                MinecraftClient.getInstance().player.setGameMode(GameMode.SURVIVAL);
                 MinecraftClient.getInstance().interactionManager.setGameMode(GameMode.SURVIVAL);
                 ChatPlugin.sendChat("Set Gamemode to survival");
                 break;
@@ -301,17 +301,28 @@ public class CmdProsessor{
                 ChatPlugin.sendChat(SettingPlugin.prefix + "cvar isFlying [Boolean]");
                 ChatPlugin.sendChat(SettingPlugin.prefix + "cvar canTakeDamage [Boolean]");
                 ChatPlugin.sendChat(SettingPlugin.prefix + "cvar flySpeed [Float]");
+                ChatPlugin.sendChat(SettingPlugin.prefix + "cvar stepheight [Float]");
+                break;
+
+                case "stepheight":
+                try{
+                    Integer fi = Integer.parseInt(args[2].trim());
+                    player.stepHeight = (float) fi;
+                    ChatPlugin.sendChat("Updated \"flySpeed\" to " + args[2]);
+                }catch(Exception e) {
+                    ChatPlugin.sendChat("Unknown Float \"" + args[2] + "\"");
+                }
                 break;
 
                 case "canfly":
                 switch(args[2].toLowerCase()){
                     case "true":                    
-                    player.abilities.allowFlying = true;
+                    player.getAbilities().allowFlying = true;
                     ChatPlugin.sendChat("Updated \"allowFlying\" to true");
                     break;
 
                     case "false":                    
-                    player.abilities.allowFlying = false;
+                    player.getAbilities().allowFlying = false;
                     ChatPlugin.sendChat("Updated \"allowFlying\" to false");
                     break;
 
@@ -324,12 +335,12 @@ public class CmdProsessor{
                 case "canbuild":
                 switch(args[2].toLowerCase()){
                     case "true":                    
-                    player.abilities.allowModifyWorld = true;
+                    player.getAbilities().allowModifyWorld = true;
                     ChatPlugin.sendChat("Updated \"allowModifyWorld\" to true");
                     break;
 
                     case "false":                    
-                    player.abilities.allowModifyWorld = false;
+                    player.getAbilities().allowModifyWorld = false;
                     ChatPlugin.sendChat("Updated \"allowModifyWorld\" to false");
                     break;
 
@@ -342,12 +353,12 @@ public class CmdProsessor{
                 case "isflying":
                 switch(args[2].toLowerCase()){
                     case "true":                    
-                    player.abilities.flying = true;
+                    player.getAbilities().flying = true;
                     ChatPlugin.sendChat("Updated \"flying\" to true");
                     break;
 
                     case "false":                    
-                    player.abilities.flying = false;
+                    player.getAbilities().flying = false;
                     ChatPlugin.sendChat("Updated \"flying\" to false");
                     break;
 
@@ -360,12 +371,12 @@ public class CmdProsessor{
                 case "cantakedamage":
                 switch(args[2].toLowerCase()){
                     case "true":                    
-                    player.abilities.invulnerable = true;
+                    player.getAbilities().invulnerable = true;
                     ChatPlugin.sendChat("Updated \"invulnerable\" to true");
                     break;
 
                     case "false":                    
-                    player.abilities.invulnerable = false;
+                    player.getAbilities().invulnerable = false;
                     ChatPlugin.sendChat("Updated \"invulnerable\" to false");
                     break;
 
@@ -411,7 +422,7 @@ public class CmdProsessor{
                     Float y = Float.parseFloat(args[3]);
                     Float z = Float.parseFloat(args[4]);
                     Boolean og = Boolean.valueOf(args[5]);
-                    MinecraftClient.getInstance().getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, og)); 
+                    MinecraftClient.getInstance().getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, og)); 
                 }catch(Exception e){
                     ChatPlugin.sendChat("Invalid format");
                 }
@@ -422,7 +433,7 @@ public class CmdProsessor{
                     Float y = Float.parseFloat(args[2]);
                     Float p = Float.parseFloat(args[3]);
                     Boolean og = Boolean.valueOf(args[4]);
-                    MinecraftClient.getInstance().getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookOnly(y, p, og)); 
+                    MinecraftClient.getInstance().getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(y, p, og)); 
                 }catch(Exception e){
                     ChatPlugin.sendChat("Invalid format");
                 }
@@ -489,6 +500,9 @@ public class CmdProsessor{
                     }
                 break;
 
+                case "playerinteractc2spacket":
+                    MinecraftClient.getInstance().getNetworkHandler().sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND));
+                break;
 
                 default:
                 ChatPlugin.sendChat("Unknown Packet identifier");
@@ -507,8 +521,8 @@ public class CmdProsessor{
             doVariables();
             doFunctions();
             try{
-                player.pitch = Float.parseFloat(args[1]);
-                player.yaw = Float.parseFloat(args[2]);
+                player.setPitch(Float.parseFloat(args[1]));
+                player.setYaw(Float.parseFloat(args[2]));
             }catch(Exception e){
                 ChatPlugin.sendChat("Invalid Rotations, use @rotate <pitch> <yaw>");
             }
@@ -520,7 +534,7 @@ public class CmdProsessor{
             doFunctions();
             try{
                 Integer slot = Integer.parseInt(args[1]);
-                player.inventory.selectedSlot = slot;
+                player.getInventory().selectedSlot = slot;
                 MinecraftClient.getInstance().getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(slot));
             }catch(Exception e){
                 ChatPlugin.sendChat("Invalid slot, use @slot <integer>");
@@ -792,7 +806,7 @@ public class CmdProsessor{
                 nbt = nbt.replace("$", "\u00a7");
                 bstack.setTag(StringNbtReader.parse(nbt));
                 Boolean dosign = Boolean.valueOf(args[1]);
-                MinecraftClient.getInstance().getNetworkHandler().sendPacket(new BookUpdateC2SPacket(bstack, dosign, player.inventory.selectedSlot));
+                MinecraftClient.getInstance().getNetworkHandler().sendPacket(new BookUpdateC2SPacket(bstack, dosign, player.getInventory().selectedSlot));
             }catch(Exception e){
                 ChatPlugin.sendChat("Incorrect syntax, use @book <doSign> <text>");
             }
@@ -968,11 +982,11 @@ public class CmdProsessor{
 		nbt = nbt.replace("&", "\u00a7").replace("\u00a7\u00a7", "&");
 		
 		if(!stack.hasTag())
-			stack.setTag(new CompoundTag());
+			stack.setTag(new NbtCompound());
 		
 		try
 		{
-			CompoundTag tag = StringNbtReader.parse(nbt);
+			NbtCompound tag = StringNbtReader.parse(nbt);
 			stack.getTag().copyFrom(tag);
             ChatPlugin.sendChat("Modified NBT of Held item");
 			
@@ -983,7 +997,7 @@ public class CmdProsessor{
 		}
 	}
 
-    private CompoundTag parseNBT(String nbt){
+    private NbtCompound parseNBT(String nbt){
         try{
             return StringNbtReader.parse(nbt);
         }catch(Exception e){
@@ -994,7 +1008,7 @@ public class CmdProsessor{
     }
 
     private void setHandToStack(ItemStack stack){
-        MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.inventory.selectedSlot, stack));
+        MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, stack));
     }
 
     private Item getItem(String id)
@@ -1132,8 +1146,8 @@ public class CmdProsessor{
                 switch(parsed[1]){
                     case "hand":
                     AbstractClientPlayerEntity eplayer = getPlayer(parsed[0]);
-                    ItemStack item = eplayer.inventory.getMainHandStack();
-                    CompoundTag t = item.getTag();
+                    ItemStack item = eplayer.getInventory().getMainHandStack();
+                    NbtCompound t = item.getTag();
                     String nbt = t.asString().trim();
                     args[i] = nbt;
                     break;

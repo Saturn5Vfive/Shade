@@ -3,9 +3,9 @@ package net.shade;
 import org.lwjgl.glfw.GLFW;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.client.options.GameOptions;
-import net.minecraft.client.options.KeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.math.MathHelper;
 

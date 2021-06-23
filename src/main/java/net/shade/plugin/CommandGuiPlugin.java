@@ -53,7 +53,7 @@ public class CommandGuiPlugin extends Screen{
             }
         });
 
-        this.addButton(execute);
+        this.addDrawable(execute);
         super.init();
     }
 
