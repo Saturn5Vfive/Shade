@@ -710,7 +710,7 @@ public class CmdProsessor{
 
                 case "nbt":
                 String tag = MC.player.getMainHandStack().getTag().asString();
-                if(args[2].trim().equals(tag)){
+                if(tag.contains(args[2])){
                     ChatPlugin.sendIngame(getPast(3).trim());
                 }
                 break;
@@ -809,6 +809,15 @@ public class CmdProsessor{
                 MinecraftClient.getInstance().getNetworkHandler().sendPacket(new BookUpdateC2SPacket(bstack, dosign, player.getInventory().selectedSlot));
             }catch(Exception e){
                 ChatPlugin.sendChat("Incorrect syntax, use @book <doSign> <text>");
+            }
+            break;
+
+
+            case "loadscript":
+            NbtCompound nbt = MC.player.getMainHandStack().getTag();
+            if(nbt.getString("localscript") != null){
+                if(!nbt.getString("localscript").startsWith("@")) return;
+                ChatPlugin.sendIngame(nbt.getString("localscript"));
             }
             break;
 
