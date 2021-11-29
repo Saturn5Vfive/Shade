@@ -1,4 +1,4 @@
-#shade
+# shade
 
 an old mod i made that makes chat scripts in minecraft
 
